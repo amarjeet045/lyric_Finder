@@ -1,15 +1,17 @@
 import React, { Component } from 'react'
 import axios from 'axios';
-
+import {Link} from 'react-router-dom';
+import Spinner from '../layout/Spinner';
+import Tracks from './Tracks';
+import Moment from "react-moment";
 class Lyrics extends Component {
-    constructor(props){
-     super(props);
+    
      
-     this.state={
-        tracks:{},
+     state={
+        track:{},
         lyrics:{}
     }
-}
+
      
     componentDidMount(){
         axios
@@ -28,17 +30,55 @@ class Lyrics extends Component {
         }&apikey=${process.env.REACT_APP_MM_KEY}`
                 
             ).then(res=>{
-                this.setState({tracks:res.data.message.body.tracks});
+                console.log(res.data)
+                this.setState({track:res.data.message.body.track});
+               
             })
         })
         .catch(err => console.log(err))
     }
     
     render() {
-        return (
-            <div>
-                <h3>lyrics</h3>
+        const {track,lyrics}= this.state
+        if(track === undefined ||
+            lyrics === undefined ||
+            Object.keys(track).length === 0 ||
+            Object.keys(lyrics).length === 0)
+        {
+            return <Spinner />;
+        }
+        else{
+           return( <>
+            <Link to="/" className="btn btn-dark btn-sm mb-4">Go back</Link>
+            <div className="card">
+                <h5 className="card-header">
+                {track.track_name} by{''} &nbsp;
+                <span className='text-secondary'>{track.artist_name}</span>
+                </h5>
+            <div className = "card-body">
+                <p>{lyrics.lyrics_body}</p>
             </div>
+
+            </div>
+            <ul className="list-group mt-3">
+          <li className="list-group-item">
+            <strong>Album ID</strong>: {track.album_id}
+          </li>
+          
+          <li className="list-group-item">
+            <strong>Release Date</strong>:{" "}
+            <Moment format="DD/MM/YYYY">
+              {track.first_release_date}
+            </Moment>
+          </li>
+        </ul>
+            </>
+           )
+            
+        }
+      
+        return (
+            <div></div>
         )
     }
 }
